@@ -48,4 +48,3 @@ contract Payroll {
         employee.transfer(salary);
     }
 }
-
