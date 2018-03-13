@@ -18,7 +18,7 @@ contract Payroll{
     
     //Pay the rest salary when address or salary changes
     function payRest() {
-        if (employee != 0x0) {
+        if (employee != 0) {
             uint restPayment;
             restPayment = salary * (now - lastPayday) / payDuration;
             employee.transfer(restPayment);
