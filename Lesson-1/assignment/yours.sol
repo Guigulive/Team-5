@@ -2,17 +2,17 @@ pragma solidity ^0.4.14;
 
 contract Payroll {
     uint constant payDuration = 10 seconds;
-
+    
     address owner;
-    uint salary;
     address employee;
+    uint salary;
     uint lastPayday;
-
-    function Payroll() {
+    
+    function Payroll() public {
         owner = msg.sender;
     }
     
-    function updateEmployee(address e, uint s) {
+    function updateEmployee(address e, uint s) public {
         require(msg.sender == owner);
         
         if (employee != 0x0) {
@@ -25,15 +25,15 @@ contract Payroll {
         lastPayday = now;
     }
     
-    function addFund() payable returns (uint) {
+    function addFund() payable public returns (uint) {
         return this.balance;
     }
     
-    function calculateRunway() returns (uint) {
+    function calculateRunway() public returns (uint) {
         return this.balance / salary;
     }
     
-    function hasEnoughFund() returns (bool) {
+    function hasEnoughFund() public returns (bool) {
         return calculateRunway() > 0;
     }
     
@@ -42,8 +42,26 @@ contract Payroll {
         
         uint nextPayday = lastPayday + payDuration;
         assert(nextPayday < now);
-
+        
         lastPayday = nextPayday;
         employee.transfer(salary);
+    }
+
+    //CHANGE CURRENT EMPLOYEE ADDRESS, IF SUCCEED THEN RETURN EX-EMPLOYEE
+    function changeEmployee(address e) public returns (address) {
+        require(msg.sender == owner);
+        
+        address exEmployee = employee;
+        employee = e;
+        return exEmployee;
+    }
+    
+    //CHANGE CURRENT EMPLOYEE SALARY, IF SUCCEED THEN RETURN OLD SALARY
+    function changeSalary(uint s) public returns (uint) {
+        require(msg.sender == owner);
+        
+        uint oldSalary = salary / 1 ether;
+        salary = s * 1 ether;
+        return oldSalary;
     }
 }
