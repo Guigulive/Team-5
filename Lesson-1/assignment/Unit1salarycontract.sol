@@ -1,31 +1,43 @@
-//Solidity version
+//solidity version
 pragma solidity ^0.4.14;
 
-//Contract declaration
+//contract declaration
 contract Payroll{
     
     //Define variables;
     uint salary;
     address administrator;
     address employee;
-    uint constant payDuration = 10 seconds;
+    uint constant payDuration = 30 seconds;
     uint lastPayday = now;
     
     //identification of the contract owner
-    function employer () {
+    function Payroll() {
         administrator = msg.sender;
     }
     
+    //Pay the rest salary when address or salary changes
+    function payRest() {
+        if (employee != 0x0) {
+            uint restPayment;
+            restPayment = salary * (now - lastPayday) / payDuration;
+            employee.transfer(restPayment);
+            lastPayday = now;
+        }
+    }
+    
     //Adjust or declare your employee's address
-    function toEmployee(address switchEmployee) returns (address){
+    function toEmployee(address switchEmployee) returns (address) {
         require(msg.sender == administrator);
+        payRest();
         employee = switchEmployee;
         return employee;
     }
     
     //Adjust or declare the salary of your employee
-    function adjustSalary(uint newSalary) returns (uint){
+    function adjustSalary(uint newSalary) returns (uint) {
         require(msg.sender == administrator);
+        payRest();
         salary = newSalary * 1 ether;
         return salary;
     }
@@ -35,28 +47,29 @@ contract Payroll{
         return this.balance;
     }
     
-    //Calculate how many times can be paid from your balance
+    //calculate how many times can be paid from your balance
     function calculateRunway() returns (uint) {
         return this.balance / salary;
     }
     
-    //Calculate if your balance can afford the next payment
+    //calculate if your balance can afford the next payment
     function enoughFund() returns (bool) {
         return calculateRunway() > 0;
     }
     
-    //Your employee can get paid from this function
+    //your employee can get paid from this function
     function getPaid() {
         if (msg.sender != employee) {
             revert();
         }
         
         uint nextPayday = lastPayday + payDuration;
+        
         if (nextPayday > now) {
             revert();
         }
         
-            lastPayday = nextPayday;
-            employee.transfer(salary);
-        }
+        lastPayday = nextPayday;
+        employee.transfer(salary);
     }
+}
