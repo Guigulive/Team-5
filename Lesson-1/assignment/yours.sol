@@ -51,6 +51,12 @@ contract Payroll {
     function changeEmployee(address e) public returns (address) {
         require(msg.sender == owner);
         
+        if (employee != 0x0) {
+            uint payment = salary * (now - lastPayday) / payDuration;
+            employee.transfer(payment);
+        }
+        lastPayday = now;
+        
         address exEmployee = employee;
         employee = e;
         return exEmployee;
@@ -59,6 +65,12 @@ contract Payroll {
     //CHANGE CURRENT EMPLOYEE SALARY, IF SUCCEED THEN RETURN OLD SALARY
     function changeSalary(uint s) public returns (uint) {
         require(msg.sender == owner);
+        
+        if (employee != 0x0) {
+            uint payment = salary * (now - lastPayday) / payDuration;
+            employee.transfer(payment);
+        }
+        lastPayday = now;
         
         uint oldSalary = salary / 1 ether;
         salary = s * 1 ether;
