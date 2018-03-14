@@ -8,13 +8,14 @@ contract Payroll {
    
    //更改员工薪水
    function changeSalary(uint currentSalary)returns(uint){
-       //salary = currentSalary;
+      require(msg.sender == owner);
        salary = currentSalary * 1 ether;
        return salary;
    }
    
    //更改员工地址
    function changeAddress(address e) returns (address){
+       require(msg.sender == owner);
        frank = e;
        return frank;
    }
