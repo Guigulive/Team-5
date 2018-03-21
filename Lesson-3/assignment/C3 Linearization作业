@@ -1,0 +1,19 @@
+第三题（加分题）：自学C3 Linearization, 求以下 contract Z 的继承线
+contract O
+contract A is O
+contract B is O
+contract C is O
+contract K1 is A, B
+contract K2 is A, C
+contract Z is K1, K2
+
+求解过程：
+实际上Z的继承栈可以转化成 [Z] + [[K1, A, B], [K2, A, C], [K1, K2]]这个序列的扁平化过程
+
+  [Z] + [[K1, A, B, O], [K2, A, C, O], [K1, K2]]
+= [Z, K1] + [[A, B, O], [K2, A, C, O], [K2]]
+= [Z, K1, K2] + [[A, B, O], [A, C, O]]
+= [Z, K1, K2, A] + [[B, O], [C, O]]
+= [Z, K1, K2, A, B] + [[O], [C, O]]
+= [Z, K1, K2, A, B, C] + [[O], [O]]
+= [Z, K1, K2, A, B, C, O] 
