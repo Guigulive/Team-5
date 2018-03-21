@@ -1,0 +1,137 @@
+pragma solidity ^0.4.14; 
+
+import "./SafeMath.sol";
+import "./Ownable.sol";
+
+
+contract Payroll is Ownable {
+    
+    using SafeMath for uint;
+    
+    uint constant payDuration = 10 seconds;
+    address owner;
+    mapping(address=>Employee) public employees; 
+    uint totalsalary;
+    
+    struct Employee {
+        address id;
+        uint salary;
+        uint lastPayday;
+    }
+    
+    modifier employeeExist(address employeeId){
+        
+        var employee = employees[employeeId];
+        assert(employee.id != 0x0);
+        _;
+        
+    }
+    
+    modifier addresscheck (address employeeId, address newEmployeeId){
+        
+        require (employeeId!=newEmployeeId);
+        _;
+    }
+    
+    
+    function _partialPaid(Employee employee) private {
+        uint payment = employee.salary .mul (now.sub( employee.lastPayday)).div(payDuration);
+        employee.id.transfer(payment);
+    }
+    
+  
+    
+    function addEmployee(address employeeId, uint salary) onlyOwner {
+        var employee = employees[employeeId];
+        assert(employee.id == 0x0);
+        totalsalary=totalsalary.add(salary*1 ether); 
+        employees[employeeId]=(Employee(employeeId, salary * 1 ether, now));
+        
+    }
+    
+    function removeEmployee(address employeeId) onlyOwner employeeExist(employeeId){
+        var employee = employees[employeeId];
+        _partialPaid(employee);
+        totalsalary=totalsalary.sub(employee.salary);
+        delete employees[employeeId];
+    }
+    
+    function updateEmployee(address employeeId, uint salary) onlyOwner employeeExist(employeeId){
+        var employee= employees[employeeId];
+        totalsalary=totalsalary.sub(employee.salary);
+        _partialPaid(employee);
+        employees[employeeId].salary = salary * 1 ether; 
+        employees[employeeId].lastPayday = now; 
+        totalsalary=totalsalary.add(salary*1 ether);
+
+return;
+            
+    }
+    
+    function addFund() payable returns (uint){
+        return this.balance;
+    }
+    
+    function calculateRunway() returns (uint){
+
+        
+        return this.balance.div(totalsalary);
+    }
+    
+    
+    function hasEnoughFund() returns (bool){
+        return calculateRunway() > 0;
+    }
+    
+    /* 
+    function checkEmployee(address employeeId) returns (uint salary, uint lastPayday){
+        var employee=employees[employeeId];
+        salary=employee.salary;
+        lastPayday=employee.lastPayday;
+    }
+    
+    */
+    
+    function getPaid() employeeExist(msg.sender) {
+        var employee =employees[msg.sender];
+        
+        uint nextPayday = employee.lastPayday + payDuration;
+        
+        if (nextPayday > now){
+            revert();
+        } 
+        
+        employees[msg.sender].lastPayday = nextPayday;
+        employee.id.transfer(employee.salary);
+    }
+    
+    function changePaymentAddress (address employeeId, address newEmployeeId)onlyOwner addresscheck(employeeId, newEmployeeId){
+        
+        var employee = employees[newEmployeeId]; 
+        var oldEmployee = employees[employeeId]; 
+        employees[newEmployeeId] = Employee(newEmployeeId, oldEmployee.salary, oldEmployee.lastPayday); 
+        delete employees[employeeId]; 
+    }
+}
+
+L(O)=[O];
+L(A)=[A]+merge(L(O),[O])=[A,O];
+L(B)=[B]+merge(L(O),[O])=[B,O];
+L(C)=[C]+merge(L(O),[O])=[C,O];
+L(K1)=[K1]+merge(L(A),L(B),[A,B])
+=[K1]+ merge([A,O], [B,O],[A,B])
+=[K1,A]+merge([O],[B,O],[B])
+=[K1,A,B]+merge([O],[O])
+=[K1,A,B,O]
+L(K2)= [K2,A,C,O]
+L(Z)=[Z]+merge(L(K1),L(K2),[K1,K2])
+=[Z]+merge([K1,A,B,O], [K2,A,C,O],[K1,K2])
+=[Z,K1]+merge([A,B,O], [K2,A,C,O], [K2])
+=[Z,K1,K2]+merge([A,B,O],[A,C,O])
+=[Z,K1,K2,A]+merge([B,O],[C,O])
+=[Z,K1,K2,A,B]+merge([O],[C,O])
+=[Z,K1,K2,A,B,C]+merge([O],[O,])
+=[Z,K1,K2,A,B,C,O]
+
+
+
