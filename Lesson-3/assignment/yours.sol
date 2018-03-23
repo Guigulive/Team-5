@@ -36,7 +36,6 @@ contract Payroll is Ownable {
     }
     
     function _partialPaid(Employee employee) private {
-        //uint payment = employee.salary * (now - employee.lastPayday) / payDuration;
         uint payment = employee.salary.mul(now.sub(employee.lastPayday)).div(payDuration);
         employee.id.transfer(payment);
     }
@@ -46,17 +45,14 @@ contract Payroll is Ownable {
         var employee = employees[employeeId];
         assert(employee.id == 0x0);
         
-        //totalSalary += salary * 1 ether;
         totalSalary = totalSalary.add(salary.mul(1 ether));
         
-        //employees[employeeId] = Employee(employeeId, salary * 1 ether, now);
         employees[employeeId] = Employee(employeeId, salary.mul(1 ether), now);
     }
     
     function removeEmployee(address employeeId) onlyOwner employeeExist(employeeId) public {
         var employee = employees[employeeId];
         
-        //totalSalary -= employee.salary;
         totalSalary = totalSalary.sub(employee.salary);
         
         _partialPaid(employee);
@@ -66,13 +62,10 @@ contract Payroll is Ownable {
     function updateEmployee(address employeeId, uint salary) onlyOwner employeeExist(employeeId) public {
         var employee = employees[employeeId];
         
-        //totalSalary -= employee.salary;
         totalSalary = totalSalary.sub(employee.salary);
-        //totalSalary += salary * 1 ether;
         totalSalary = totalSalary.add(salary.mul(1 ether));
         
         _partialPaid(employee);
-        //employees[employeeId].salary = salary * 1 ether;
         employees[employeeId].salary = salary.mul(1 ether);
         employees[employeeId].lastPayday = now;
     }
@@ -84,7 +77,6 @@ contract Payroll is Ownable {
     function calculateRunway() public returns (uint) {
         // 防止无员工时调用产生除零异常
         assert(totalSalary != 0);
-        //return this.balance / totalSalary;
         return this.balance.div(totalSalary);
     }
     
@@ -95,7 +87,6 @@ contract Payroll is Ownable {
     function getPaid() employeeExist(msg.sender) public {
         var employee = employees[msg.sender];
         
-        //uint nextPayday = employee.lastPayday + payDuration;
         uint nextPayday = employee.lastPayday.add(payDuration);
         assert(nextPayday < now);
         
