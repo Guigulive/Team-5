@@ -32,15 +32,4 @@ contract('Payroll', function(accounts) {
         })
     });
 
-    it("getPaid successed!", function() {
-        return Payroll.deployed().then(function(instance) {
-            payrollInstance = instance;
-            console.log("*** accounts[1] => " + accounts[1] );
-            //return payrollInstance.getPaid();  
-         })             
-
-
-
-    }); 
-
 });
