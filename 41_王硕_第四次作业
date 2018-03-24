@@ -1,0 +1,37 @@
+TestPayroll.js
+
+var Payroll = artifacts.require("./Payroll.sol");
+
+contract('Payroll', function(accounts) {
+
+    it("add employee successed !", function() {
+        return Payroll.deployed().then(function(instance) {
+           payrollInstance = instance;
+           return payrollInstance.addEmployee( accounts[1] , 1);  
+        }).then(function() {          
+            //console.log("*** accounts[1]) =>  " + accounts[1] );            
+            return payrollInstance.employees.call(accounts[1]);            
+        }).then(function(employee){
+            //console.log("*** employee.id => " + employee[0] );
+            employee1 = employee[0] ;
+        }).then(function(){
+            assert.equal(employee1, accounts[1]);
+        })           
+    });
+
+    it("remove employee successed !", function() {
+        return Payroll.deployed().then(function(instance) {
+           payrollInstance = instance;
+           //console.log("*** accounts[1] => " + accounts[1] );
+           return payrollInstance.removeEmployee( accounts[1] );  
+        }).then(function() { 
+            return payrollInstance.employees.call(accounts[1]);            
+        }).then(function(employee){          
+            removedEmployeeId = employee[0] ;
+          //  console.log("*** removed employee.id => " + employee[0] );
+        }).then(function(){
+            assert.equal(removedEmployeeId, 0 );            
+        })
+    });
+
+});
