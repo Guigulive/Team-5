@@ -67,3 +67,4 @@ contract('Payroll', function(accounts) {
   });  
 
 });
+
