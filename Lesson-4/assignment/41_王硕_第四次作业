@@ -7,7 +7,7 @@ contract('Payroll', function(accounts) {
            payrollInstance = instance;
            return payrollInstance.addEmployee( accounts[1] , 1);  
         }).then(function() {          
-            //console.log("*** accounts[1]) =>  " + accounts[1] );            
+                    
             return payrollInstance.employees.call(accounts[1]);            
         }).then(function(employee){
             //console.log("*** employee.id => " + employee[0] );
