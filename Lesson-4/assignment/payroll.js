@@ -26,6 +26,20 @@ contract('Payroll', function(accounts) {
     });
   });
 
+  // function addFund() payable public returns (uint)
+  it("...should add fund, then calculate runway", function() {
+    return Payroll.deployed().then(function(instance) {
+      PayrollInstance = instance;
+
+      // call target functions
+      return PayrollInstance.addFund({from: owner_id, value: web3.toWei(2, 'ether')});
+    }).then(function() {
+      return PayrollInstance.calculateRunway.call();
+    }).then(function(runway) {
+      assert.equal(runway, 2, "wrong runway.");
+    });
+  });
+
   // function removeEmployee(address employeeId) onlyOwner employeeExist(employeeId) public
   it("...should remove the employee just added", function() {
     return Payroll.deployed().then(function(instance) {
