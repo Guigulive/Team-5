@@ -1,10 +1,14 @@
 //solidity version
 pragma solidity ^0.4.14;
 
+import './safemath.sol';
+import './Ownable.sol';
+
 //contract declaration
-contract Payroll{
+contract Payroll is Ownable {
+    using SafeMath for uint;
         //Define variables;
-    struct Employee{
+    struct Employee {
         address id;
         uint salary;
         uint lastPayday;
@@ -15,17 +19,6 @@ contract Payroll{
     uint constant payDuration = 10 seconds;
     uint totalSalary = 0;
     
-    //identification of the contract owner
-    function Payroll() {
-        administrator = msg.sender;
-    }
-    
-    //modifier
-    modifier admin {
-       require(msg.sender == administrator);
-       _;
-    }
-    
     modifier existEmployee(address employeeId) {
         var employee = employees[employeeId];
         assert(employeeId != 0x0);
@@ -33,35 +26,35 @@ contract Payroll{
     }
     
     //add employee
-    function addEmployee(address employeeId, uint salary) admin {
+    function addEmployee(address employeeId, uint salary) onlyOwner {
         var employee = employees[employeeId];
         assert(employee.id == 0x0);
-        employees[employeeId] = Employee(employeeId, salary * 1 ether, now);
-        totalSalary += salary * 1 ether;
+        employees[employeeId] = Employee(employeeId, salary.mul(1 ether), now);
+        totalSalary = totalSalary.add(salary.mul(1 ether));
     }
     
     //remove employee
-    function removeEmployee(address employeeId) admin existEmployee(employeeId) {
+    function removeEmployee(address employeeId) onlyOwner existEmployee(employeeId) {
         var employee = employees[employeeId];
         _wages(employee);
-        totalSalary -= employees[employeeId].salary * 1 ether;
+        totalSalary = totalSalary.sub(employees[employeeId].salary.mul(1 ether));
         delete employees[employeeId];
         return;
     }
     
     //Pay the wages when address or salary changes
     function _wages(Employee employee) private {
-        uint wage = employee.salary * (now - employee.lastPayday) / payDuration;
+        uint wage = employee.salary.mul(now.sub(employee.lastPayday)).div(payDuration);
         employee.id.transfer(wage);
         employee.lastPayday = now;
     }
     
     //Adjust or declare the salary of your employee
-    function adjustSalary(address employeeId, uint newSalary) admin existEmployee(employeeId) {
+    function adjustSalary(address employeeId, uint newSalary) onlyOwner existEmployee(employeeId) {
         var employee = employees[employeeId];
         _wages(employee);
-        totalSalary += (employee.salary - newSalary);
-        employees[employeeId].salary = newSalary * 1 ether;
+        totalSalary = totalSalary.add(employee.salary.sub(newSalary));
+        employees[employeeId].salary = newSalary.mul(1 ether);
         employees[employeeId].lastPayday = now;
     }
     
@@ -71,11 +64,16 @@ contract Payroll{
     }
     
     //change payment address
-    function changePaymentAddress(address employeeId, address newAddress) admin existEmployee(employeeId) {
+    function changePaymentAddress(address employeeId, address newAddress) onlyOwner existEmployee(employeeId) {
         var employee = employees[employeeId];
-        uint currentSalary = employee.salary / 1 ether;
+        uint currentSalary = employee.salary.div(1 ether);
+        uint wage = employee.salary.mul(now.sub(employee.lastPayday).div(payDuration));
+        totalSalary = totalSalary.sub(employees[employeeId].salary.mul(1 ether));
+        delete employees[employeeId];
         addEmployee(newAddress, currentSalary);
-        removeEmployee(employeeId);
+        var newEmployee = employees[newAddress];
+        newEmployee.id.transfer(wage);
+        newEmployee.lastPayday = now;
     }
     
     //check employees details
@@ -87,7 +85,7 @@ contract Payroll{
     
     //calculate how many times can be paid from your balance
     function calculateRunway() returns (uint) {
-        return this.balance / totalSalary;
+        return this.balance.div(totalSalary);
     }
     
     //calculate if your balance can afford the next payment
@@ -99,7 +97,7 @@ contract Payroll{
     function getPaid() existEmployee(msg.sender) {
         var employee = employees[msg.sender];
         
-        uint nextPayday = employee.lastPayday + payDuration;
+        uint nextPayday = employee.lastPayday.add(payDuration);
         
         assert(nextPayday < now);
         
