@@ -15,7 +15,7 @@ contract Payroll {
     
     uint totalSalary;
 
-    function Payroll() public{
+    function Payroll() public {
         owner = msg.sender;
     }
     
@@ -32,7 +32,7 @@ contract Payroll {
         return employees.length;
     }
 
-    function addEmployee(address employeeId, uint salary) public{
+    function addEmployee(address employeeId, uint salary) public {
         require(msg.sender == owner);
         uint index = _findEmployee(employeeId);
         if(index < employees.length){
@@ -64,19 +64,19 @@ contract Payroll {
         totalSalary+=salary*1 ether;
     }
     
-    function addFund() payable public returns (uint){
+    function addFund() payable public returns (uint) {
         return address(this).balance;
     }
     
-    function calculateRunway() view public returns (uint){
+    function calculateRunway() view public returns (uint) {
         return address(this).balance / totalSalary;
     }
     
-    function hasEnoughFund() view public returns (bool){
+    function hasEnoughFund() view public returns (bool) {
         return calculateRunway() > 0;
     }
     
-    function getPaid() public{
+    function getPaid() public {
         uint index = _findEmployee(msg.sender);
         require(index<employees.length); 
 
