@@ -67,7 +67,18 @@ class EmployeeList extends Component {
   loadEmployees(employeeCount) {
   }
 
-  addEmployee = () => {
+  addEmployee = () => { 
+    const { payroll, account } = this.props;
+    payroll.addEmployee(
+      this.state.address,
+      this.state.salary,
+      {from: account, gas: 310000}
+    ).then(() => {
+      this.setState({
+        loading: false, 
+        showModal: false,
+      });
+    });
   }
 
   updateEmployee = (address, salary) => {
