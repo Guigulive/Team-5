@@ -11,7 +11,7 @@ contract Payroll is Ownable {
         uint lastPayday;
     }
     
-    uint constant payDuration = 10 seconds;
+    uint constant payDuration = 60 seconds;
 
     uint totalSalary;
     uint totalEmployee;
@@ -21,7 +21,8 @@ contract Payroll is Ownable {
 
     modifier employeeExit(address employeeId) {
         var employee = employees[employeeId];
-        assert(employee.id != 0x0);
+        //assert(employee.id != 0x0);
+        assert(employee.salary > 0);
         _;
     }
     

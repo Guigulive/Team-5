@@ -14,9 +14,30 @@ class Employer extends Component {
   }
 
   checkEmployee = () => {
+    const {payroll,account,web3} = this.props;
+    console.log('checkEmployee employee:',account);
+    payroll.employees.call(account,{
+      from:account,
+      gas:1000000
+    }).then((result) =>{
+      console.log(result);
+      this.setState({
+        salary: web3.fromWei(result[1].toNumber()),
+        lastPaidDate: new Date(result[2].toNumber()*1000)
+      })
+    });
   }
 
   getPaid = () => {
+    const {payroll,account,web3} = this.props;
+    console.log('getPaid employee:',account);
+    payroll.getPaid({
+      from:account,
+      gas:1000000
+    }).then((result) =>{
+      console.log(result);
+      alert('You have been paid.');
+    });
   }
 
   renderContent() {
@@ -33,7 +54,7 @@ class Employer extends Component {
             <Card title="薪水">{salary} Ether</Card>
           </Col>
           <Col span={8}>
-            <Card title="上次支付">{lastPaidDate}</Card>
+            <Card title="上次支付">{lastPaidDate.toString()}</Card>
           </Col>
           <Col span={8}>
             <Card title="帐号金额">{balance} Ether</Card>
