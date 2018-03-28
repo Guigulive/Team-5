@@ -1,12 +1,16 @@
 import React, { Component } from 'react'
-import { Card, Col, Row, Layout, Alert, message, Button } from 'antd';
+import { Card, Col, Row, Layout, Alert, Button } from 'antd';
 
 import Common from './Common';
 
-class Employer extends Component {
+class Employee extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      balance: 0,
+      salary: 0,
+      lastPaidDate: ``,
+    };
   }
 
   componentDidMount() {
@@ -14,9 +18,26 @@ class Employer extends Component {
   }
 
   checkEmployee = () => {
+    const { payroll, account, web3 } = this.props;
+    payroll.employees.call(account, {
+      from: account,
+      gas: 1000000
+    }).then((result) => {
+      this.setState({
+        salary: web3.fromWei(result[1].toNumber()),
+        lastPaidDate: new Date(result[2].toNumber() * 1000)
+      })
+    })
   }
 
   getPaid = () => {
+    const { payroll, account } = this.props;
+    payroll.getPaid({
+      from: account,
+      gas: 1000000
+    }).then((result) => {
+      Alert("Payment received successfully")
+    })
   }
 
   renderContent() {
@@ -33,7 +54,7 @@ class Employer extends Component {
             <Card title="薪水">{salary} Ether</Card>
           </Col>
           <Col span={8}>
-            <Card title="上次支付">{lastPaidDate}</Card>
+            <Card title="上次支付">{lastPaidDate.toString()}</Card>
           </Col>
           <Col span={8}>
             <Card title="帐号金额">{balance} Ether</Card>
@@ -45,7 +66,7 @@ class Employer extends Component {
           icon="bank"
           onClick={this.getPaid}
         >
-          获得酬劳
+          获得薪酬
         </Button>
       </div>
     );
@@ -64,4 +85,4 @@ class Employer extends Component {
   }
 }
 
-export default Employer
+export default Employee

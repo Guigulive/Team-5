@@ -19,6 +19,7 @@ contract Payroll is Ownable {
     uint constant payDuration = 10 seconds;
     uint totalSalary = 0;
     uint totalEmployee = 0;
+    address[] employeeList;
     
     modifier existEmployee(address employeeId) {
         var employee = employees[employeeId];
@@ -33,6 +34,7 @@ contract Payroll is Ownable {
         employees[employeeId] = Employee(employeeId, salary.mul(1 ether), now);
         totalSalary = totalSalary.add(salary.mul(1 ether));
         totalEmployee = totalEmployee.add(1);
+        employeeList.push(employeeId);
     }
     
     //remove employee
@@ -42,6 +44,14 @@ contract Payroll is Ownable {
         totalSalary = totalSalary.sub(employees[employeeId].salary.mul(1 ether));
         delete employees[employeeId];
         totalEmployee = totalEmployee.sub(1);
+        for (uint index = 0; index < employeeList.length; index++) {
+            if (employeeList[index] == employeeId) {
+                employeeList[index] = employeeList[employeeList.length.sub(1)];
+                break;
+            }
+        }
+        delete employeeList[employeeList.length.sub(1)];
+        employeeList.length = employeeList.length.sub(1);
         return;
     }
     
@@ -80,7 +90,8 @@ contract Payroll is Ownable {
     }
     
     //check employees details
-    function checkEmployee(address employeeId) returns (uint salary, uint lastPayday) {
+    function checkEmployee(uint index) returns (address employeeId, uint salary, uint lastPayday) {
+        employeeId = employeeList[index];
         var employee = employees[employeeId];
         salary = employee.salary;
         lastPayday = employee.lastPayday;

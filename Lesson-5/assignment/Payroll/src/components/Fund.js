@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, InputNumber, Button } from 'antd';
+import { Form, InputNumber, Button, Alert } from 'antd';
 
 import Common from './Common';
 
@@ -17,8 +17,14 @@ class Fund extends Component {
     const { payroll, account, web3 } = this.props;
     payroll.addFund({
       from: account,
+      gas: 1000000,
       value: web3.toWei(this.state.fund)
-    });
+    }).then((result) => {
+      alert("Successfully add fund")
+      window.location.reload()
+    }).catch((err) => {
+      alert("Add fund failed please check and debug")
+    })
   }
 
   render() {
@@ -35,12 +41,8 @@ class Fund extends Component {
             />
           </FormItem>
           <FormItem>
-            <Button
-              type="primary"
-              htmlType="submit"
-              disabled={!this.state.fund}
-            >
-              增加资金
+            <Button type="primary" htmlType="submit" disabled={!this.state.fund} onClick={this.onClick} >
+              Add Fund
             </Button>
           </FormItem>
         </Form>
