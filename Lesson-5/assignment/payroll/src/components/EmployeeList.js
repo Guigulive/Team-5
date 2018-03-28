@@ -64,7 +64,7 @@ class EmployeeList extends Component {
 
   }
 
-  loadEmployees(employeeCount) {
+  async loadEmployees(employeeCount) {
     const { payroll, web3 } = this.props;
     let employees = [];
     //遍历所有雇员，并获取相关属性
