@@ -65,15 +65,74 @@ class EmployeeList extends Component {
   }
 
   loadEmployees(employeeCount) {
+    const { payroll, web3 } = this.props;
+    let employees = [];
+    //遍历所有雇员，并获取相关属性
+    for(let i=0; i < employeeCount; i++) {
+      let result = await payroll.checkEmployee.call(i);
+      let [ address, salary, lastPaidDay ] = result;
+
+      employees.push({
+        key: i,
+        address: address,
+        salary: web3.fromWei(salary).toNumber(),
+        lastPaidDay: lastPaidDay.toNumber()
+      });
+    }
+
+    this.setState({
+      employees,
+      loading: false
+    });
   }
 
+  // 新增雇员
   addEmployee = () => {
+    const {payroll, account} = this.props;
+    payroll.addEmployee(
+      this.state.address,
+      this.state.salary,
+      {from: account, gas: 300000})
+    .then(()=> {
+      message.info("add employee succeed");
+      this.setState({showModal: false});
+    }, error => {
+      alert("add employee failed");
+      this.setState({showModal: false});
+    });
   }
 
+  // 更新雇员
   updateEmployee = (address, salary) => {
+    const {payroll, account} = this.props;
+    
+    payroll.updateEmployee(
+      address,
+      salary,
+      {from: account, gas: 300000})
+    .then(()=> {
+      message.info("update employee succeed");
+      this.setState({showModal: false});
+    }, error => {
+      alert("update employee failed");
+      this.setState({showModal: false});
+    });
   }
 
+  // 删除雇员
   removeEmployee = (employeeId) => {
+    const {payroll, account} = this.props;
+
+    payroll.removeEmployee(
+      employeeId,
+      {from: account, gas: 300000})
+      .then(()=> {
+        message.info("remove employee succeed");
+        this.setState({showModal: false});
+      }, error => {
+        alert("remove employee failed");
+        this.setState({showModal: false});
+      })
   }
 
   renderModal() {

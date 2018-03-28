@@ -1,7 +1,7 @@
 pragma solidity ^0.4.14;
 
-import './SafeMath.sol';
-import './Ownable.sol';
+import "./SafeMath.sol";
+import "./Ownable.sol";
 
 contract Payroll is Ownable {
     using SafeMath for uint;
@@ -15,7 +15,9 @@ contract Payroll is Ownable {
 
     uint totalSalary;
     uint totalEmployee;
-    address[] employeeList;
+    
+    // 由于mapping不能遍历，故要存储所有的address以便用于迭代（不优雅）
+    address[] public employeeList;
     mapping(address => Employee) public employees;
 
 
@@ -32,14 +34,14 @@ contract Payroll is Ownable {
         employee.id.transfer(payment);
     }
 
-    function checkEmployee(uint index) returns (address employeeId, uint salary, uint lastPayday) {
+    function checkEmployee(uint index) public returns (address employeeId, uint salary, uint lastPayday) {
         employeeId = employeeList[index];
         var employee = employees[employeeId];
         salary = employee.salary;
         lastPayday = employee.lastPayday;
     }
     
-    function addEmployee(address employeeId, uint salary) onlyOwner {
+    function addEmployee(address employeeId, uint salary) onlyOwner public {
         var employee = employees[employeeId];
         assert(employee.id == 0x0);
 
@@ -49,16 +51,26 @@ contract Payroll is Ownable {
         employeeList.push(employeeId);
     }
     
-    function removeEmployee(address employeeId) onlyOwner employeeExit(employeeId) {
+    function removeEmployee(address employeeId) onlyOwner public employeeExit(employeeId) {
         var employee = employees[employeeId];
 
         _partialPaid(employee);
         totalSalary = totalSalary.sub(employee.salary);
         delete employees[employeeId];
         totalEmployee = totalEmployee.sub(1);
+
+        //TODO: 遍历 employeeList，以便删除相应员工地址
+        for(uint idx = 0; idx < employeeList.length; idx++) {
+            if(employeeList[idx] == employeeId) {
+                employeeList[idx] = employeeList[employeeList.length - 1];
+                break;
+            }
+        }
+        delete employeeList[employeeList.length - 1];
+        employeeList.length = employeeList.length - 1; 
     }
     
-    function updateEmployee(address employeeId, uint salary) onlyOwner employeeExit(employeeId) {
+    function updateEmployee(address employeeId, uint salary) onlyOwner public employeeExit(employeeId) {
         var employee = employees[employeeId];
 
         _partialPaid(employee);
@@ -68,19 +80,19 @@ contract Payroll is Ownable {
         totalSalary = totalSalary.add(employee.salary);
     }
     
-    function addFund() payable returns (uint) {
+    function addFund() payable public returns (uint) {
         return this.balance;
     }
     
-    function calculateRunway() returns (uint) {
+    function calculateRunway() public returns (uint) {
         return this.balance.div(totalSalary);
     }
     
-    function hasEnoughFund() returns (bool) {
+    function hasEnoughFund() public returns (bool) {
         return calculateRunway() > 0;
     }
     
-    function getPaid() employeeExit(msg.sender) {
+    function getPaid() public employeeExit(msg.sender) {
         var employee = employees[msg.sender];
 
         uint nextPayday = employee.lastPayday.add(payDuration);
@@ -90,7 +102,7 @@ contract Payroll is Ownable {
         employee.id.transfer(employee.salary);
     }
 
-    function checkInfo() returns (uint balance, uint runway, uint employeeCount) {
+    function checkInfo() public returns (uint balance, uint runway, uint employeeCount) {
         balance = this.balance;
         employeeCount = totalEmployee;
 

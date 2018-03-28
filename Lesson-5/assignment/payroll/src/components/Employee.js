@@ -14,9 +14,33 @@ class Employer extends Component {
   }
 
   checkEmployee = () => {
+    // 获取属性变量
+    const { account, payroll, web3 } = this.props;
+    payroll.employees.call(
+      account
+    ).then(([id, salary, lastPaidDate]) => {
+        // 设置薪水
+        salary = web3.fromWei(salary).toNumber();
+        // 设置上次支付日期
+        lastPaidDate = lastPaidDate.toNumber();
+        this.setState({salary, lastPaidDate});
+    });
+    web3.eth.getBalance(account, (err, balance) => {
+      // 设置余额
+      balance = web3.fromWei(balance).toNumber();
+      this.setState({balance});
+    });
   }
 
   getPaid = () => {
+    const {payroll, account} = this.props;
+    // 调用支付合约接口
+    payroll.getPaid({
+      from: account,
+      gas: 1000000})
+      .then((result) => {
+        alert("get paid error");
+      });
   }
 
   renderContent() {
