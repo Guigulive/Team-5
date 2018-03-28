@@ -4,7 +4,7 @@ export default function Accounts({
     accounts=[],
     onSelectAccount
 }){
-
+   
     return (
         <div className="pure-menu sidebar">
             <span className="pure-menu-heading">帐号列表</span>

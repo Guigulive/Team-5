@@ -9,7 +9,7 @@ class EditableCell extends React.Component {
       editable: false,
     }
   }
-
+  
   handleChange = (e) => {
     const value = e.target.value;
     this.setState({ value });

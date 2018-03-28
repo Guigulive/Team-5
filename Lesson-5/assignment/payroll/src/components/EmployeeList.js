@@ -38,7 +38,7 @@ class EmployeeList extends React.Component {
         }
 
         columns[1].render = (text, record) => (
-            <EditableCell
+            <EditableCell 
                 value={text}
                 onChange={ this.updateEmployee.bind(this, record.address) } />
         )
@@ -66,7 +66,7 @@ class EmployeeList extends React.Component {
 
     loadEmployees(employeeCount) {
         const { web3, payroll, account } = this.props
-
+        
         const requests = []
         for (let index = 0; index < employeeCount; index++) {
             requests.push(payroll.getEmployeeInfo.call(index, {
@@ -160,8 +160,8 @@ class EmployeeList extends React.Component {
 
     renderModal() {
         return (
-            <Modal title="增加员工"
-                visible={this.state.showModal}
+            <Modal title="增加员工" 
+                visible={this.state.showModal} 
                 okText="确认"
                 cancelText="取消"
                 onOk={this.addEmployee}
@@ -192,4 +192,5 @@ class EmployeeList extends React.Component {
     }
 }
 
-export default EmployeeList
+export default EmployeeList 
+    
