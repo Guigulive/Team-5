@@ -17,6 +17,7 @@ class Employer extends Component {
 
   componentDidMount() {
     const { account, payroll } = this.props;
+    console.log('Employer componentDidMount account:',account);
     payroll.owner.call({
       from: account
     }).then((result) => {

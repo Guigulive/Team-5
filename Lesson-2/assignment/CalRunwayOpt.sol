@@ -1,5 +1,4 @@
 /*作业请提交在这个目录下*/
-<<<<<<< HEAD
 pragma solidity ^0.4.14;
 
 contract Payroll {
@@ -13,8 +12,10 @@ contract Payroll {
 
     address owner;
     Employee[] employees;
+    
+    uint totalSalary;
 
-    function Payroll() public{
+    function Payroll() public {
         owner = msg.sender;
     }
     
@@ -31,13 +32,14 @@ contract Payroll {
         return employees.length;
     }
 
-    function addEmployee(address employeeId, uint salary) public{
+    function addEmployee(address employeeId, uint salary) public {
         require(msg.sender == owner);
         uint index = _findEmployee(employeeId);
         if(index < employees.length){
             revert();
         }
-        employees.push(Employee(employeeId,salary,now));
+        employees.push(Employee(employeeId,salary*1 ether,now));
+        totalSalary+=salary*1 ether;
     }
     
     function removeEmployee(address employeeId) public {
@@ -45,6 +47,7 @@ contract Payroll {
         uint index = _findEmployee(employeeId);
         require(index<employees.length);
             
+        totalSalary-=employees[index].salary;
         employees[index] = employees[employees.length-1];
         employees.length -=1;
     }
@@ -56,26 +59,24 @@ contract Payroll {
         require(index<employees.length);
         
         _partialPaid(employees[index]);
+        totalSalary-=employees[index].salary;
         employees[index].salary = salary * 1 ether;
+        totalSalary+=salary*1 ether;
     }
     
-    function addFund() payable public returns (uint){
+    function addFund() payable public returns (uint) {
         return address(this).balance;
     }
     
-    function calculateRunway() view public returns (uint){
-        uint totalSalary = 0;
-        for (uint i = 0; i < employees.length; i++) {
-            totalSalary += employees[i].salary;
-        }
+    function calculateRunway() view public returns (uint) {
         return address(this).balance / totalSalary;
     }
     
-    function hasEnoughFund() public returns (bool){
+    function hasEnoughFund() view public returns (bool) {
         return calculateRunway() > 0;
     }
     
-    function getPaid() public{
+    function getPaid() public {
         uint index = _findEmployee(msg.sender);
         require(index<employees.length); 
 
@@ -86,6 +87,3 @@ contract Payroll {
         
     }
 }
-
-=======
->>>>>>> upstream/master

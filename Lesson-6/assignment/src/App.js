@@ -58,6 +58,7 @@ class App extends Component {
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
+      console.log('account[0]:',accounts[0]);
       this.setState({
         account: accounts[0],
       });

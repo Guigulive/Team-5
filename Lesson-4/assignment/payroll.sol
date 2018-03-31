@@ -1,5 +1,5 @@
-/*作业请提交在这个目录下*/
-pragma solidity ^0.4.14;
+pragma solidity ^0.4.2;
+
 
 /**
  * @title SafeMath
@@ -10,7 +10,7 @@ library SafeMath {
   /**
   * @dev Multiplies two numbers, throws on overflow.
   */
-  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+  function mul(uint256 a, uint256 b) internal returns (uint256) {
     if (a == 0) {
       return 0;
     }
@@ -22,7 +22,7 @@ library SafeMath {
   /**
   * @dev Integer division of two numbers, truncating the quotient.
   */
-  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+  function div(uint256 a, uint256 b) internal returns (uint256) {
     // assert(b > 0); // Solidity automatically throws when dividing by 0
     uint256 c = a / b;
     // assert(a == b * c + a % b); // There is no case in which this doesn't hold
@@ -32,7 +32,7 @@ library SafeMath {
   /**
   * @dev Substracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
   */
-  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+  function sub(uint256 a, uint256 b) internal returns (uint256) {
     assert(b <= a);
     return a - b;
   }
@@ -40,7 +40,7 @@ library SafeMath {
   /**
   * @dev Adds two numbers, throws on overflow.
   */
-  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+  function add(uint256 a, uint256 b) internal returns (uint256) {
     uint256 c = a + b;
     assert(c >= a);
     return c;
@@ -81,7 +81,7 @@ contract Ownable {
    */
   function transferOwnership(address newOwner) public onlyOwner {
     require(newOwner != address(0));
-    emit OwnershipTransferred(owner, newOwner);
+    OwnershipTransferred(owner, newOwner);
     owner = newOwner;
   }
 }
@@ -98,9 +98,9 @@ contract Payroll is Ownable{
     
     uint constant payDuration = 10 seconds;
 
-    mapping (address => Employee) employees;
+    mapping (address => Employee) public employees;
     
-    uint totalSalary;
+    uint public totalSalary;
 
 
     modifier employeeExist(address employeeId) {
@@ -108,7 +108,7 @@ contract Payroll is Ownable{
         _;
     }
     
-    function _partialPaid(address employeeId) private employeeExist(employeeId){
+    function _partialPaid(address employeeId) private employeeExist(employeeId) {
         uint payment = employees[employeeId].salary * (now - employees[employeeId].lastPayday) / payDuration;
         employees[employeeId].lastPayday = now;
         employees[employeeId].id.transfer(payment);
@@ -119,6 +119,7 @@ contract Payroll is Ownable{
         employees[employeeId] = Employee(employeeId,salary*1 ether,now);
         totalSalary+=salary*1 ether;
     }
+
     
     function removeEmployee(address employeeId) public onlyOwner {            
         totalSalary-=employees[employeeId].salary;
@@ -137,11 +138,11 @@ contract Payroll is Ownable{
         return address(this).balance;
     }
     
-    function calculateRunway() view public returns (uint) {
+    function calculateRunway() public returns (uint) {
         return address(this).balance / totalSalary;
     }
     
-    function hasEnoughFund() view public returns (bool) {
+    function hasEnoughFund() public returns (bool) {
         return calculateRunway() > 0;
     }
     

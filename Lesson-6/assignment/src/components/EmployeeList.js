@@ -65,15 +65,66 @@ class EmployeeList extends Component {
   }
 
   loadEmployees(employeeCount) {
+    const { payroll, account, web3 } = this.props;
+    const requests = [];
+
+    for(let index = 0 ;index < employeeCount;index++){
+        requests.push(payroll.checkEmployee.call(index,{
+          from:account
+        }))
+    }
+
+    Promise.all(requests).then(
+      values => {
+        const employees = values.map(
+          value => ({
+            key:value[0],
+            address:value[0],
+            salary:web3.fromWei(value[1].toNumber()),
+            lastPaidDay: new Date(value[2].toNumber()*1000).toString()
+          })
+        )
+
+        this.setState({
+          employees,
+          loading:false
+        })
+    })
+
   }
 
   addEmployee = () => {
+    const {payroll,account} = this.props;
+    console.log('Add employee employer:',account);
+    console.log('Add employee address:',this.state.address);
+    payroll.addEmployee(this.state.address,parseInt(this.state.salary),{
+      from: account,
+      gas:1000000
+    }).then((result) =>{
+      alert('success!');
+    })
   }
 
   updateEmployee = (address, salary) => {
+    console.log('Update employee input:',address,salary);
+    const {payroll,account} = this.props;
+    payroll.updateEmployee(address,salary,{
+      from: account,
+      gas:1000000
+    }).then((result) =>{
+      alert('success!');
+    })
   }
 
   removeEmployee = (employeeId) => {
+    console.log('Remove employee input:',employeeId);
+    const {payroll,account} = this.props;
+    payroll.removeEmployee(employeeId,{
+      from: account,
+      gas:1000000
+    }).then((result) =>{
+      alert('success!');
+    })
   }
 
   renderModal() {
