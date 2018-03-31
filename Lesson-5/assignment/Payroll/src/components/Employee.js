@@ -36,7 +36,7 @@ class Employee extends Component {
       from: account,
       gas: 1000000
     }).then((result) => {
-      Alert("Payment received successfully")
+        alert("Payment received successfully");
     })
   }
 
