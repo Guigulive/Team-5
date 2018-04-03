@@ -6,7 +6,6 @@ module.exports = function(deployer) {
   deployer.deploy(Ownable);
   deployer.deploy(SafeMath);
 
-  deployer.link(Ownable, employment);
-  deployer.link(SafeMath, employment);
+  deployer.link(Ownable, SafeMath, employment);
   deployer.deploy(employment);
 };

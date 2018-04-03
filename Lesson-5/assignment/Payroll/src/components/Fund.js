@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, InputNumber, Button, Alert } from 'antd';
+import { Form, InputNumber, Button, message } from 'antd';
 
 import Common from './Common';
 
@@ -20,10 +20,9 @@ class Fund extends Component {
       gas: 1000000,
       value: web3.toWei(this.state.fund)
     }).then((result) => {
-      alert("Successfully add fund")
-      window.location.reload()
+      message.success("Successfully add fund");
     }).catch((err) => {
-      alert("Add fund failed please check and debug")
+      message.error("Failed to add fund please check and debug");
     })
   }
 

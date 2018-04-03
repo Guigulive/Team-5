@@ -20,7 +20,23 @@ contract Payroll is Ownable {
     uint totalSalary = 0;
     uint totalEmployee = 0;
     address[] employeeList;
-    
+
+    event NewEmployee(
+        address employee
+    );
+    event UpdateEmployee(
+        address employee
+    );
+    event RemoveEmployee(
+        address employee
+    );
+    event NewFund(
+        uint balance
+    );
+    event GetPaid(
+        address employee
+    );
+
     modifier existEmployee(address employeeId) {
         var employee = employees[employeeId];
         assert(employeeId != 0x0);
@@ -35,6 +51,7 @@ contract Payroll is Ownable {
         totalSalary = totalSalary.add(salary.mul(1 ether));
         totalEmployee = totalEmployee.add(1);
         employeeList.push(employeeId);
+        NewEmployee(employeeId);
     }
     
     //remove employee
@@ -52,6 +69,7 @@ contract Payroll is Ownable {
         }
         delete employeeList[employeeList.length.sub(1)];
         employeeList.length = employeeList.length.sub(1);
+        RemoveEmployee(employeeId);
         return;
     }
     
@@ -69,10 +87,12 @@ contract Payroll is Ownable {
         totalSalary = totalSalary.add(employee.salary.sub(newSalary));
         employees[employeeId].salary = newSalary.mul(1 ether);
         employees[employeeId].lastPayday = now;
+        UpdateEmployee(employeeId);
     }
     
     //Add etherium fund into the contract
     function addFund() payable returns (uint) {
+        NewFund(this.balance);
         return this.balance;
     }
     
@@ -117,6 +137,7 @@ contract Payroll is Ownable {
         
         employees[msg.sender].lastPayday = nextPayday;
         employee.id.transfer(employee.salary);
+        GetPaid(employee.id);
     }
 
     function checkInfo() returns (uint balance, uint runway, uint employeeCount) {
