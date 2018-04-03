@@ -1,0 +1,95 @@
+pragma solidity ^0.4.14;
+
+contract Payroll {
+   struct Employee{
+       address id;
+       uint salary;
+       uint lastPayday;
+   }
+   
+   uint constant payDuration = 5 seconds;
+   address owner;    
+   mapping(address => Employee) employees ;
+   
+   uint totalSalary = 0 ;
+   
+   function Payroll(){
+        //当前创建合约的人
+       owner = msg.sender;
+   }
+   
+   function _partialPaid(Employee employee) private{
+        uint payment = employee.salary * (now - employee.lastPayday) / payDuration ;
+        employee.id.transfer(payment); 
+   }
+ 
+   function addEmployee(address employeeId, uint salary){
+       require(msg.sender == owner);
+       var employee = employees[employeeId];
+       //保证你想要加入的这个员工是之前没有的,如果员工已经存在，就没有必要再加一遍了
+       assert(employee.id == 0x0) ;
+       
+       totalSalary += salary * 1 ether;
+       employees[employeeId] = Employee( employeeId, salary * 1 ether, now );
+   }
+   
+   function removeEmployee(address employeeId){
+        require(msg.sender == owner);
+        var employee = employees[employeeId];
+        assert(employee.id != 0x0) ;
+        
+        //否则快付工资的时候老板直接把你remove掉，你这个月不是白干了嘛,防止黑心老板,删除员工信息前，如果没有到payDuration规定的结算日，但也做了工作，就要先结算清楚
+        _partialPaid( employee );
+        totalSalary -= employees[employeeId].salary;
+        
+        delete employees[employeeId];
+   }
+   
+   function updateEmployee(address employeeId ,uint salary)    {
+       require(msg.sender == owner);
+       var employee = employees[employeeId];
+       assert(employee.id != 0x0) ;
+        
+       _partialPaid( employee );
+       employees[employeeId].salary = salary * 1 ether;
+       employees[employeeId].lastPayday = now;
+   }
+   
+   function changePaymentAddress(address oldEmployeeId, address newEmployeeId){
+       require(msg.sender == owner);
+       var employee = employees[oldEmployeeId];
+       assert(employee.id != 0x0) ;
+       
+       employees[oldEmployeeId].id = newEmployeeId;
+   }
+   
+   //往智能合约里加钱
+   function addFund() payable returns (uint) {
+        return this.balance;
+   }
+   
+   // 返回钱能支付工资的次数
+   function calculateRunway() returns (uint){
+    
+       //当前可以支付多少次薪水
+       return this.balance / totalSalary ;
+   }
+   
+   //查看在contract中工资的钱能否支持一个月的钱
+   function hasEnoughFund() returns(bool){
+       return calculateRunway() > 0;
+   }
+   
+   //到了领工资日，就可以点击领取工资
+   function getPaid(){
+       var employee = employees[msg.sender] ;
+       assert(employee.id != 0x0) ;
+        
+       uint nextPayDay = employee.lastPayday + payDuration;
+       assert(nextPayDay < now );
+       
+       employees[msg.sender].lastPayday = nextPayDay ;
+       employee.id.transfer(employee.salary);              
+   }
+   
+}
